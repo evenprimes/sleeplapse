@@ -7,24 +7,34 @@ import RPi.GPIO as GPIO
 
 # Pins definitions
 btn_pin = 4
-led_pin = 12
+IR_PIN = 12
+LED_PIN = 13
 
 # Set up pins
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(btn_pin, GPIO.IN)
-GPIO.setup(led_pin, GPIO.OUT)
+GPIO.setup(IR_PIN, GPIO.OUT)
+GPIO.setup(LED_PIN, GPIO.OUT)
 
 is_button_pressed = False
 blink_light = False
 
 # If button is pushed, light up LED
 try:
+    pwm = GPIO.PWM(LED_PIN, 50)
+    pwm.start(0)
+
+    for level in range(100, 0, -1):
+        pwm.ChangeDutyCycle(level)
+        time.sleep(0.02)
+    pwm.stop()
+
     while True:
         if GPIO.input(btn_pin):
-            GPIO.output(led_pin, GPIO.LOW)
+            GPIO.output(IR_PIN, GPIO.LOW)
             is_button_pressed = False
         else:
-            GPIO.output(led_pin, GPIO.HIGH)
+            GPIO.output(IR_PIN, GPIO.HIGH)
             if not is_button_pressed:
                 is_button_pressed = True
                 print("button pressed")
@@ -33,4 +43,5 @@ try:
 
 # When you press ctrl+c, this will be called
 finally:
+
     GPIO.cleanup()
