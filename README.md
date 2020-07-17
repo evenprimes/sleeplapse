@@ -1,14 +1,14 @@
 # sleeplapse
+
 An over designed sleep timelapse generator for Raspberry Pi.
 
 Goal is to have this running on the RPi all night and then generate a timelapse
 in the morning.
 
-While this is normally 5 lines of code, I can't make things that simple. Plus, the
-NoIR Camera module needs *something* to get decent pics.
+I've got 8 IR LEDs wired directly to 5v power, so no need to control them in
+code.
 
-Silly enchancements:
-- Use 3 IR LEDs to illuminate the room enough to get a picture
-- Use a button to start/stop the picture taking
-- Use a regular LED to indicate starting/stopping status (but not all night since
-that might keep me up)
+## Python packages
+
+I used `apt-get` to install `python3-picamera`. That's the only extra package
+needed.

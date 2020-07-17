@@ -1,31 +1,42 @@
-"""sleeplapse.py -- a way over complicated time-lapse sleep camera"""
+"""sleeplapse.py -- a way over complicated time-lapse sleep camera
+
+The original idea was to have a button that allowed me to start/stop the timelapse
+and an LED that would blink a few times to show if the button press had just been
+accepted.
+
+I scrapped that plan, mostly in order to get a working project faster. :)
+
+I also was thinking I'd cycle the IR LEDs on/off for each picture. However, since
+we're taking a picture every 12 seconds or so, I just wired the IR LEDs directly to
+5v power.
+"""
 import time
-import RPi.GPIO as GPIO
+from pathlib import Path
 
-from contextlib import contextmanager
-
-
-@contextmanager
-def GPIOContext(*args, **kwds):
-    """GPIO context so we can use a with statement
-
-    Limitations:
-        - Passes all arguments to .setmode()
-        - Doesn't support customize .cleanup() channels
-    """
-    GPIO.setmode(*args, **kwds)
-    try:
-        yield
-    finally:
-        GPIO.cleanup()
+import picamera
 
 
-@contextmanager
-def pwn_context(*args, **kwds):
-    """pwm context manager so we can use a with statement"""
-    pwm = GPIO.PWM(*args, **kwds)
-    try:
-        pwm.start(0)
-        yield pwm
-    finally:
-        pwm.stop()
+# In the end I want a time lapse with 10 fps, that lasts ~4 minutes. For 8 hours,
+# that's about 12 seconds between pics.
+WAIT_TIME = 12
+
+
+def main():
+    pic_path = Path("/home/pi/sleeplapse_pics")
+    if not pic_path.exists():
+        pic_path.mkdir(parents=True)
+
+    # Sleep for 5 minutes to give us time to actually get into bed and turn off
+    # the lights.
+    time.sleep(300)
+
+    with picamera.PiCamera() as camera:
+        camera.resolution(1920, 1080)  # Full HD resolution
+        for filename in camera.capture_continuous(
+            "/home/pi/sleeplapse_pics/img{timestamp:%H-%M-%S-%f}.jpg"
+        ):
+            time.sleep(WAIT_TIME)
+
+
+if __name__ == "__main__":
+    main()
