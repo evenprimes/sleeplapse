@@ -21,7 +21,7 @@ import picamera
 # In the end I want a time lapse with 10 fps, that lasts ~4 minutes. For 8 hours,
 # that's about 12 seconds between pics.
 WAIT_TIME = 6
-START_TIME = "11:00"
+START_TIME = "23:00"
 END_AFTER_HOURS = 10 
 
 
@@ -66,11 +66,7 @@ def timelapse():
         print(f"Creating pic dir: {pic_path}")
         pic_path.mkdir(parents=True)
 
-    # end_time.shift(hours=+END_AFTER_HOURS)
-    end_time = now.shift(minutes=+2)
-    print(end_time) 
-
-    print(pic_path)
+    end_time = now.shift(hours=+END_AFTER_HOURS)
     os.chdir(pic_path)
     
     with picamera.PiCamera() as camera:
