@@ -35,10 +35,12 @@ def start_time():
 def main():
     pic_path = Path("/home/pi/sleeplapse_pics")
     if not pic_path.exists():
+        print(f"Creating pic dir: {pic_path}")
         pic_path.mkdir(parents=True)
 
     # Sleep for 5 minutes to give us time to actually get into bed and turn off
     # the lights.
+    print("Pausing for 5 minutes...")
     time.sleep(300)
 
     with picamera.PiCamera() as camera:
