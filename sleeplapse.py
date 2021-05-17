@@ -10,6 +10,7 @@ I also was thinking I'd cycle the IR LEDs on/off for each picture. However, sinc
 we're taking a picture every 12 seconds or so, I just wired the IR LEDs directly to
 5v power.
 """
+import os
 import time
 from pathlib import Path
 
@@ -20,8 +21,8 @@ import picamera
 # In the end I want a time lapse with 10 fps, that lasts ~4 minutes. For 8 hours,
 # that's about 12 seconds between pics.
 WAIT_TIME = 6
-START_TIME = "15:03"
-END_AFTER_HOURS = 9
+START_TIME = "11:00"
+END_AFTER_HOURS = 10 
 
 
 def start_time():
@@ -40,41 +41,49 @@ def seconds_until_start(start_time, current_time):
 def wait_until_start():
     """Wait until the start time"""
     stime = start_time()
+    if arrow.now() > stime:
+        # print("Starting immediately")
+        return 
     keep_waiting = True
     while keep_waiting:
         now = arrow.now()
         until = seconds_until_start(stime, now)
         if until > 60:
-            print(f"it's now {now.format('H:mm')} waiting until {stime.format('H:mm')}, holding 1 minute")
+            # print(f"it's now {now.format('H:mm')} waiting until {stime.format('H:mm')}, holding 1 minute")
             time.sleep(60)
         elif until > 0:
-            print(f"{until} seconds until start...")
+            # print(f"{until} seconds until start...")
             time.sleep(1)
         else:
-            print("starting.")
+            # print("starting.")
             keep_waiting = False
 
 
-def main():
-    pic_path = Path("/home/pi/sleeplapse_pics")
+def timelapse():
+    now = arrow.now()
+    pic_path = Path(f"/home/pi/sl_{now.format('YYYY-MM-DD')}")
     if not pic_path.exists():
         print(f"Creating pic dir: {pic_path}")
         pic_path.mkdir(parents=True)
 
-    # Sleep for 5 minutes to give us time to actually get into bed and turn off
-    # the lights.
-    print("Pausing for 5 minutes...")
-    time.sleep(300)
+    # end_time.shift(hours=+END_AFTER_HOURS)
+    end_time = now.shift(minutes=+2)
+    print(end_time) 
 
+    print(pic_path)
+    os.chdir(pic_path)
+    
     with picamera.PiCamera() as camera:
-        camera.resolution(1920, 1080)  # Full HD resolution
-        for filename in camera.capture_continuous(
-            "/home/pi/sleeplapse_pics/img{timestamp:%H-%M-%S-%f}.jpg"
-        ):
-            print(time.localtime())
-            time.sleep(WAIT_TIME)
+        camera.resolution = (1920, 1080)  # Full HD resolution
+        for filename in camera.capture_continuous("sl_{counter:05d}.jpg"):
+            print(time.asctime())
+            if arrow.now() > end_time:
+                break
+            else:
+                time.sleep(WAIT_TIME)
 
 
 if __name__ == "__main__":
     # main()
     wait_until_start()
+    timelapse()
