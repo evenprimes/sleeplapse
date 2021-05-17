@@ -13,12 +13,23 @@ we're taking a picture every 12 seconds or so, I just wired the IR LEDs directly
 import time
 from pathlib import Path
 
+import arrow
 import picamera
 
 
 # In the end I want a time lapse with 10 fps, that lasts ~4 minutes. For 8 hours,
 # that's about 12 seconds between pics.
-WAIT_TIME = 12
+WAIT_TIME = 6
+START_TIME = "23:00"
+END_AFTER_HOURS = 9
+
+
+def start_time():
+    """Return an arrow time object with the start time"""
+    (shour, smin) = START_TIME.split(":")
+    stime = arrow.now()
+    stime.replace(hour=int(shour), min=int(smin))
+    return stime
 
 
 def main():
@@ -35,8 +46,10 @@ def main():
         for filename in camera.capture_continuous(
             "/home/pi/sleeplapse_pics/img{timestamp:%H-%M-%S-%f}.jpg"
         ):
+            print(time.localtime())
             time.sleep(WAIT_TIME)
 
 
 if __name__ == "__main__":
-    main()
+    # main()
+    print(start_time)
