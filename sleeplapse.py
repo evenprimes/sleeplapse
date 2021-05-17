@@ -20,7 +20,7 @@ import picamera
 # In the end I want a time lapse with 10 fps, that lasts ~4 minutes. For 8 hours,
 # that's about 12 seconds between pics.
 WAIT_TIME = 6
-START_TIME = "23:00"
+START_TIME = "15:03"
 END_AFTER_HOURS = 9
 
 
@@ -29,6 +29,30 @@ def start_time():
     (shour, smin) = START_TIME.split(":")
     stime = arrow.now()
     return arrow.Arrow(stime.year, stime.month, stime.day, int(shour), int(smin), tzinfo=stime.tzinfo)
+
+
+def seconds_until_start(start_time, current_time):
+    """Return the number of seconds until start time"""
+    difference = start_time - current_time
+    return difference.seconds 
+
+
+def wait_until_start():
+    """Wait until the start time"""
+    stime = start_time()
+    keep_waiting = True
+    while keep_waiting:
+        now = arrow.now()
+        until = seconds_until_start(stime, now)
+        if until > 60:
+            print(f"it's now {now.format('H:mm')} waiting until {stime.format('H:mm')}, holding 1 minute")
+            time.sleep(60)
+        elif until > 0:
+            print(f"{until} seconds until start...")
+            time.sleep(1)
+        else:
+            print("starting.")
+            keep_waiting = False
 
 
 def main():
@@ -53,4 +77,4 @@ def main():
 
 if __name__ == "__main__":
     # main()
-    print(start_time())
+    wait_until_start()
