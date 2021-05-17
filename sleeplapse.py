@@ -28,8 +28,7 @@ def start_time():
     """Return an arrow time object with the start time"""
     (shour, smin) = START_TIME.split(":")
     stime = arrow.now()
-    stime.replace(hour=int(shour), min=int(smin))
-    return stime
+    return arrow.Arrow(stime.year, stime.month, stime.day, int(shour), int(smin), tzinfo=stime.tzinfo)
 
 
 def main():
@@ -54,4 +53,4 @@ def main():
 
 if __name__ == "__main__":
     # main()
-    print(start_time)
+    print(start_time())
