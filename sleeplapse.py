@@ -87,16 +87,13 @@ def timelapse():
     if not pic_path.exists():
         log.info(f"Creating pic dir: {pic_path}")
         pic_path.mkdir(parents=True)
+    os.chdir(pic_path)
+    log.info(f"Picture directory: {pic_path}")
 
     if __debug__:
         end_time = now.shift(minutes=+3)
     else:
         end_time = now.shift(hours=+END_AFTER_HOURS)
-    os.chdir(pic_path)
-
-    log.info(f"Picture directory: {pic_path}")
-    log.info(f"Start time: {start_time}")
-    log.info(f"End time: {end_time}")
 
     with picamera.PiCamera() as camera:
         camera.resolution = (1920, 1080)  # Full HD resolution
@@ -114,11 +111,13 @@ if __name__ == "__main__":
     if __debug__: print("In debug mode")
     log.info("Starting program ===============================")
     start_time, end_time = start_and_end_time()
+    log.info(f"Start time: {start_time}")
+    log.info(f"End time: {end_time}")
     while arrow.now() < end_time:
         try:
-	    wait_until_start(start_time)
-	    timelapse()
-	    log.info("Ended program normally =========================")
+            wait_until_start(start_time)
+            timelapse()
+            log.info("Ended program normally =========================")
         except:
             log.exception("Something fucked up!!!")
             # sys.exit(1)
