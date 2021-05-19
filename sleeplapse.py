@@ -24,8 +24,8 @@ import picamera
 # In the end I want a time lapse with 10 fps, that lasts ~4 minutes. For 8 hours,
 # that's about 12 seconds between pics.
 WAIT_TIME = 6
-START_TIME = "11:10"
-END_AFTER_HOURS = 9 
+START_TIME = "11:59"
+END_AFTER_HOURS = 9
 
 
 # Setup our basic logging options
@@ -37,6 +37,7 @@ log = logging.getLogger("sleeplapselogging")
 log.setLevel(os.environ.get("LOGLEVEL", "INFO"))
 log.addHandler(handler)
 log.info("Hello, world")
+
 
 def start_and_end_time():
     """Return an arrow time object with the start time"""
@@ -50,11 +51,13 @@ def start_and_end_time():
         end_time = start_time.shift(minutes=+2)
     else:
         end_time = start_time.shift(hours=+END_AFTER_HOURS)
+    return start_time, end_time
+
 
 def seconds_until_start(start_time, current_time):
     """Return the number of seconds until start time"""
     difference = start_time - current_time
-    return difference.seconds 
+    return difference.seconds
 
 
 def wait_until_start(start_time):
@@ -62,7 +65,7 @@ def wait_until_start(start_time):
     # stime = start_time()
     if arrow.now() > start_time:
         log.info("Starting immediately")
-        return 
+        return
     keep_waiting = True
     while keep_waiting:
         now = arrow.now()
@@ -80,15 +83,21 @@ def wait_until_start(start_time):
 
 def timelapse():
     now = arrow.now()
-    pic_path = Path(f"/home/pi/sl_{now.format('YYYY-MM-DD')}")
+    pic_path = Path(f"/home/pi/lapse_{now.format('YYYY-MM-DD')}")
     if not pic_path.exists():
         log.info(f"Creating pic dir: {pic_path}")
         pic_path.mkdir(parents=True)
 
-    # end_time = now.shift(hours=+END_AFTER_HOURS)
-    end_time = now.shift(minutes=+3)
+    if __debug__:
+        end_time = now.shift(minutes=+3)
+    else:
+        end_time = now.shift(hours=+END_AFTER_HOURS)
     os.chdir(pic_path)
-    
+
+    log.info(f"Picture directory: {pic_path}")
+    log.info(f"Start time: {start_time}")
+    log.info(f"End time: {end_time}")
+
     with picamera.PiCamera() as camera:
         camera.resolution = (1920, 1080)  # Full HD resolution
         camera.rotation = 90
@@ -102,7 +111,7 @@ def timelapse():
 
 
 if __name__ == "__main__":
-
+    if __debug__: print("In debug mode")
     log.info("Starting program ===============================")
     start_time, end_time = start_and_end_time()
     while arrow.now() < end_time:
