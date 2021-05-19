@@ -30,7 +30,7 @@ END_AFTER_HOURS = 9
 
 # Setup our basic logging options
 handler = logging.handlers.WatchedFileHandler(
-    os.environ.get("LOGFILE", "/home/pi/sleeplapse/sleeplapse.log"))
+    os.environ.get("LOGFILE", "/home/pi/sleeplapse/lapse.log"))
 formatter = logging.Formatter("%(asctime)s : %(levelname)s : %(name)s : %(message)s")
 handler.setFormatter(formatter)
 log = logging.getLogger("sleeplapselogging")
@@ -71,7 +71,7 @@ def wait_until_start(start_time):
         now = arrow.now()
         until = seconds_until_start(start_time, now)
         if until > 60:
-            log.info(f"it's now {now.format('H:mm')} waiting until {stime.format('H:mm')}, holding 1 minute")
+            log.info(f"it's now {now.format('H:mm')} waiting until {start_time.format('H:mm')}, holding 1 minute")
             time.sleep(60)
         elif until > 0:
             log.info(f"{until} seconds until start...")
@@ -98,7 +98,7 @@ def timelapse():
     with picamera.PiCamera() as camera:
         camera.resolution = (1920, 1080)  # Full HD resolution
         camera.rotation = 90
-        for filename in camera.capture_continuous("sl_{timestamp:%H%M%S}.jpg"):
+        for filename in camera.capture_continuous("sl_{timestamp:%Y%j_%H%M%S}.jpg"):
             log.info(f"Taking pic at: {time.asctime()}")
             if arrow.now() > end_time:
                 log.info("Got to end time, quitting normally")
