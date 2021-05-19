@@ -24,8 +24,8 @@ import picamera
 # In the end I want a time lapse with 10 fps, that lasts ~4 minutes. For 8 hours,
 # that's about 12 seconds between pics.
 WAIT_TIME = 6
-START_TIME = "11:59"
-END_AFTER_HOURS = 9
+START_TIME = "23:59"        # 11:59 PM
+END_AFTER_HOURS = 8         # Stop after 8 hours, since we're getting up at 8
 
 
 # Setup our basic logging options
@@ -61,7 +61,11 @@ def seconds_until_start(start_time, current_time):
 
 
 def wait_until_start(start_time):
-    """Wait until the start time"""
+    """Wait until the start time
+
+    This just ses the time.sleep() call. I could get slick and just sleep 1 time for a much longer period, but
+    I want to be able to review the log file and verify that things are running.
+    """
     # stime = start_time()
     if arrow.now() > start_time:
         log.info("Starting immediately")
@@ -82,6 +86,13 @@ def wait_until_start(start_time):
 
 
 def timelapse():
+    """Run the timelapse
+
+    This does the actual timelapse. The big thing here is that the timestamp is used. The files will be renamed
+    as part of adding the timestamp onto the images. I use a full date timestamp so that if there's an
+    exception that triggers, the program will just pick up again and there won't be any filename/sequence issues
+    in the recovery.
+    """
     now = arrow.now()
     pic_path = Path(f"/home/pi/lapse_{now.format('YYYY-MM-DD')}")
     if not pic_path.exists():
@@ -91,13 +102,14 @@ def timelapse():
     log.info(f"Picture directory: {pic_path}")
 
     if __debug__:
+        # In __debug__ mode, just run for 3 minutes.
         end_time = now.shift(minutes=+3)
     else:
         end_time = now.shift(hours=+END_AFTER_HOURS)
 
     with picamera.PiCamera() as camera:
-        camera.resolution = (1920, 1080)  # Full HD resolution
-        camera.rotation = 90
+        camera.resolution = (1920, 1080)    # Full HD resolution
+        camera.rotation = 90                # The camera is on it's side. /shrug
         for filename in camera.capture_continuous("sl_{timestamp:%Y%j_%H%M%S}.jpg"):
             log.info(f"Taking pic at: {time.asctime()}")
             if arrow.now() > end_time:
