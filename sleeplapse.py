@@ -24,8 +24,8 @@ import picamera
 # In the end I want a time lapse with 10 fps, that lasts ~4 minutes. For 8 hours,
 # that's about 12 seconds between pics.
 WAIT_TIME = 6
-START_TIME = "23:59"        # 11:59 PM
-END_AFTER_HOURS = 8         # Stop after 8 hours, since we're getting up at 8
+START_TIME = "23:30"        # 11:30 PM
+END_AFTER_HOURS = 9         # Stop after 9 hours, since we're getting up at 8
 
 
 # Setup our basic logging options
@@ -111,6 +111,8 @@ def timelapse():
         camera.resolution = (1920, 1080)    # Full HD resolution
         camera.rotation = 90                # The camera is on it's side. /shrug
         for filename in camera.capture_continuous("sl_{timestamp:%Y%j_%H%M%S}.jpg"):
+            # Using the timestamp to ensure that there are no collisions when/if there's a problem during
+            # the night and the timelapse "restarts"
             log.info(f"Taking pic at: {time.asctime()}")
             if arrow.now() > end_time:
                 log.info("Got to end time, quitting normally")
