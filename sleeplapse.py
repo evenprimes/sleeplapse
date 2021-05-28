@@ -26,7 +26,7 @@ import picamera
 WAIT_TIME = 6
 START_TIME = "23:30"        # 11:30 PM
 END_AFTER_HOURS = 9         # Stop after 9 hours, since we're getting up at 8
-
+ROTATE = 90                 # When needed for different camera positions
 
 # Setup our basic logging options
 handler = logging.handlers.WatchedFileHandler(
@@ -109,7 +109,7 @@ def timelapse():
 
     with picamera.PiCamera() as camera:
         camera.resolution = (1920, 1080)    # Full HD resolution
-        camera.rotation = 90                # The camera is on it's side. /shrug
+        camera.rotation = ROTATE
         for filename in camera.capture_continuous("sl_{timestamp:%Y%j_%H%M%S}.jpg"):
             # Using the timestamp to ensure that there are no collisions when/if there's a problem during
             # the night and the timelapse "restarts"
@@ -134,4 +134,3 @@ if __name__ == "__main__":
             log.info("Ended program normally =========================")
         except:
             log.exception("Something fucked up!!!")
-            # sys.exit(1)
